@@ -7,9 +7,9 @@ import EcommerceSitePreview from '@/components/EcommerceSitePreview';
 import { GeneratedSite } from '@/lib/generation';
 
 interface DemoPageProps {
-  params: {
+  params: Promise<{
     category: string;
-  };
+  }>;
 }
 
 const demoSites: { [key: string]: GeneratedSite } = {
@@ -151,17 +151,21 @@ const demoSites: { [key: string]: GeneratedSite } = {
   }
 };
 
-export default function DemoPage({ params }: DemoPageProps) {
+export default function DemoPage({ params: paramsPromise }: DemoPageProps) {
   const [currentPage, setCurrentPage] = useState('home');
   const [device, setDevice] = useState('desktop');
   const [site, setSite] = useState<GeneratedSite | null>(null);
+  const [category, setCategory] = useState<string>('');
 
   useEffect(() => {
-    const demoSite = demoSites[params.category];
-    if (demoSite) {
-      setSite(demoSite);
-    }
-  }, [params.category]);
+    paramsPromise.then((params) => {
+      setCategory(params.category);
+      const demoSite = demoSites[params.category];
+      if (demoSite) {
+        setSite(demoSite);
+      }
+    });
+  }, [paramsPromise]);
 
   if (!site) {
     return (

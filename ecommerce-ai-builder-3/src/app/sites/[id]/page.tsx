@@ -14,7 +14,7 @@ export default function SitePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const siteId = params.id as string;
+    const siteId = params?.id as string;
 
     // Load the generated site from localStorage
     const savedSite = localStorage.getItem(`site_${siteId}`);
