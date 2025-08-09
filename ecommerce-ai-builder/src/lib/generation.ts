@@ -194,7 +194,7 @@ export async function generateEcommerceSite(request: GenerationRequest): Promise
     },
     createdAt: new Date().toISOString()
   };
-
+  console.log('🚀 Generated site:', generatedSite);
   return generatedSite;
 }
 
