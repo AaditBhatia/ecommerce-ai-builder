@@ -63,7 +63,7 @@ export default function Home() {
                 <Store className="w-10 h-10 text-white" />
                 <div className="absolute -inset-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-60 animate-pulse" />
               </div>
-              <span className="text-3xl font-bold text-white">BuildStore</span>
+              <span className="text-3xl font-bold text-white">BluePrint</span>
             </div>
             <nav className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
