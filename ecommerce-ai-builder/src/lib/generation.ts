@@ -1,5 +1,9 @@
 // E-commerce site generation service
 
+import Anthropic from '@anthropic-ai/sdk';
+import { create } from 'domain';
+
+const apiKey = "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"
 export interface GenerationRequest {
   brandName: string;
   description: string;
@@ -195,9 +199,262 @@ export async function generateEcommerceSite(request: GenerationRequest): Promise
     createdAt: new Date().toISOString()
   };
   console.log('🚀 Generated site:', generatedSite);
+  createWebsite(generatedSite);
   return generatedSite;
 }
 
 export function getColorSchemeStyles(scheme: string) {
   return colorSchemeStyles[scheme as keyof typeof colorSchemeStyles] || colorSchemeStyles.professional;
 }
+
+const generateLandingPagePrompt = (generatedSite: GeneratedSite) => {
+  return `<role>
+You are an elite frontend architect and creative director with 15+ years crafting award-winning digital experiences for luxury brands and Fortune 500 companies. Your expertise spans visual design, conversion optimization, and technical implementation.
+</role>
+
+<context>
+You're creating a single-file, production-ready landing page that will be deployed immediately. This page must be completely self-contained with zero external dependencies except CDN-hosted libraries.
+</context>
+
+<brand_identity>
+Brand Name: ${generatedSite.brandName}
+Brand Description: ${generatedSite.description}
+Industry Category: ${generatedSite.category}
+Color Scheme: ${generatedSite.colorScheme}
+</brand_identity>
+
+<content_manifest>
+HERO SECTION:
+- Headline: ${generatedSite.hero.title}
+- Subheadline: ${generatedSite.hero.subtitle}
+- Hero Image: ${generatedSite.hero.image}
+
+NAVIGATION ITEMS:
+${generatedSite.navigation.map(item => `- ${item}`).join('\n')}
+
+PRODUCT CATALOG (${generatedSite.products.length} items):
+${generatedSite.products.map((product, i) => `
+Product ${i + 1}:
+- Name: ${product.name}
+- Price: $${product.price}
+- Description: ${product.description}
+- Image: ${product.image}
+- Category: ${product.category}
+${product.variants ? `- Variants: Sizes: ${product.variants.size.join(', ')} | Colors: ${product.variants.color.join(', ')}` : ''}
+`).join('\n')}
+
+FOOTER CONTENT:
+- About: ${generatedSite.footer.about}
+- Email: ${generatedSite.footer.contact.email}
+- Phone: ${generatedSite.footer.contact.phone}
+- Address: ${generatedSite.footer.contact.address}
+</content_manifest>
+
+<design_philosophy>
+Create a ${generatedSite.colorScheme} color system that evokes:
+${generatedSite.colorScheme === 'dark' ? `sophistication, premium quality, mystery, and exclusivity` : ''}
+${generatedSite.colorScheme === 'light' ? `cleanliness, openness, trust, and approachability` : ''}
+${generatedSite.colorScheme === 'colorful' ? `energy, creativity, joy, and innovation` : ''}
+${generatedSite.colorScheme === 'pastel' ? `softness, comfort, modern elegance, and subtle luxury` : ''}
+${generatedSite.colorScheme === 'monochrome' ? `timeless elegance, minimalism, focus, and professional authority` : ''}
+
+The design must feel native to the ${generatedSite.category} industry while standing out through exceptional attention to detail.
+</design_philosophy>
+
+<technical_requirements>
+MANDATORY SPECIFICATIONS:
+1. Single HTML file with all CSS and JavaScript inline
+2. Zero build steps - must run directly in any browser
+3. Mobile-first responsive design with breakpoints at 640px, 768px, 1024px, 1280px
+4. Performance: Must achieve 95+ Lighthouse score
+5. Accessibility: WCAG 2.1 AA compliant
+6. SEO: Complete meta tags and structured data
+7. Interactions: Smooth animations and micro-interactions
+8. Cross-browser: Chrome, Safari, Firefox, Edge (latest 2 versions)
+</technical_requirements>
+
+<implementation_rules>
+FILE STRUCTURE:
+- DOCTYPE html declaration
+- Complete <head> with all meta tags, title, and embedded CSS
+- Semantic HTML5 structure
+- Inline JavaScript at end of body
+- Use modern CSS (Grid, Flexbox, Custom Properties, clamp())
+- Vanilla JavaScript only (no frameworks needed)
+
+VISUAL HIERARCHY:
+1. Hero: Full viewport height with parallax effect
+2. Navigation: Sticky with backdrop blur on scroll
+3. Products: Responsive grid with hover transformations
+4. Features: Alternating layouts with intersection observer animations
+5. Footer: Multi-column with newsletter signup
+
+TYPOGRAPHY SCALE (use clamp for fluid sizing):
+- Hero headline: clamp(2.5rem, 5vw, 4rem)
+- Section headlines: clamp(2rem, 4vw, 3rem)
+- Body text: clamp(1rem, 2vw, 1.125rem)
+- Small text: clamp(0.875rem, 1.5vw, 1rem)
+
+INTERACTION PATTERNS:
+- Navbar: Transforms on scroll (shrinks, adds shadow)
+- Products: 3D hover effect with quick-view modal
+- Buttons: Magnetic cursor effect
+- Images: Lazy loading with blur-up effect
+- Scroll: Smooth with progress indicator
+- Cart: Slide-in panel with add-to-cart animations
+
+COLOR SYSTEM GENERATION:
+Based on "${generatedSite.colorScheme}", generate a complete palette:
+- Primary: Main brand color
+- Primary-dark: 20% darker variant
+- Primary-light: 20% lighter variant
+- Accent: Complementary color for CTAs
+- Neutral-100 through Neutral-900: Grays
+- Success, Warning, Error: Semantic colors
+- Gradients: At least 2 striking gradients
+
+All colors as CSS custom properties in :root
+</implementation_rules>
+
+<quality_checklist>
+Before outputting, verify:
+□ All content from content_manifest is included
+□ Color scheme perfectly matches ${generatedSite.colorScheme} aesthetic
+□ Zero placeholder text - everything is real content
+□ All images use provided URLs with proper aspect ratios
+□ Mobile experience is flawless
+□ Page loads instantly (no external dependencies)
+□ Animations enhance, not distract
+□ CTAs are prominent and compelling
+□ Brand personality shines through every detail
+□ Code is production-ready with no TODOs
+</quality_checklist>
+
+<output_format>
+Generate a SINGLE, COMPLETE HTML file that includes:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Complete meta tags, title, SEO -->
+    <style>
+        /* Complete CSS with animations, responsive design, custom properties */
+    </style>
+</head>
+<body>
+    <!-- Complete HTML structure with all sections -->
+    <script>
+        /* Complete JavaScript for all interactions */
+    </script>
+</body>
+</html>
+
+The file must be 100% complete and ready to save as index.html and open in a browser.
+</output_format>
+
+<creative_elevation>
+This isn't just a landing page - it's a digital flagship store. Every pixel should feel intentional, every interaction should delight, and the overall experience should make visitors think "${generatedSite.brandName} is clearly the premium choice in ${generatedSite.category}."
+
+Channel the design excellence of:
+- Apple's minimalist precision
+- Nike's bold energy
+- Hermès' luxury craftsmanship
+- Tesla's futuristic innovation
+
+But make it uniquely ${generatedSite.brandName}.
+</creative_elevation>
+
+Generate the complete landing page now. Make it extraordinary.`;
+};
+
+// Example GeneratedSite data - you can customize this
+// const exampleSiteData: GeneratedSite = {
+//   brandName: "LuxTech",
+//   description: "Premium smart home technology that seamlessly blends luxury with innovation",
+//   category: "Technology",
+//   colorScheme: "dark",
+//   hero: {
+//     title: "The Future of Smart Living",
+//     subtitle: "Experience cutting-edge technology designed for the discerning homeowner",
+//     image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&h=1080&fit=crop"
+//   },
+//   navigation: ["Home", "Products", "Features", "About", "Contact"],
+//   products: [],
+//   footer: {
+//     about: "LuxTech has been pioneering smart home solutions since 2015, combining cutting-edge technology with elegant design to create products that enhance modern living.",
+//     contact: {
+//       email: "hello@luxtech.com",
+//       phone: "+1 (555) 123-4567",
+//       address: "123 Innovation Drive, San Francisco, CA 94105"
+//     }
+//   }
+// };
+
+// Function to generate website using Claude API
+async function generateWebsite(apiKey: string, siteData: GeneratedSite): Promise<string> {
+  const anthropic = new Anthropic({
+    apiKey: apiKey,
+  });
+
+  try {
+    const message = await anthropic.messages.create({
+      model: "claude-opus-4-20250514",
+      max_tokens: 8000,
+      messages: [
+        {
+          role: "user",
+          content: generateLandingPagePrompt(siteData)
+        }
+      ]
+    });
+
+    // Extract the HTML content from Claude's response
+    const content = message.content[0];
+    if (content.type === 'text') {
+      return content.text;
+    } else {
+      throw new Error('Unexpected response type from Claude API');
+    }
+  } catch (error) {
+    console.error('Error generating website:', error);
+    throw error;
+  }
+}
+
+// Main function to create and save the website
+async function createWebsite(generatedSite: GeneratedSite) {
+  // Replace with your actual API key
+  const API_KEY = process.env.ANTHROPIC_API_KEY || apiKey;
+  
+  if (API_KEY === 'your-api-key-here') {
+    console.error('Please set your ANTHROPIC_API_KEY environment variable or update the API_KEY constant');
+    return;
+  }
+
+  try {
+    console.log('Generating website with Claude...');
+    const websiteHTML = await generateWebsite(API_KEY, generatedSite);
+    
+    // Save to file (if running in Node.js environment)
+    if (typeof require !== 'undefined') {
+      const fs = require('fs');
+      fs.writeFileSync('generated-website.html', websiteHTML);
+      console.log('Website generated successfully! Saved as generated-website.html');
+    } else {
+      // For browser environment, you could download the file
+      console.log('Website HTML generated:');
+      console.log(websiteHTML);
+    }
+  } catch (error) {
+    console.error('Failed to generate website:', error);
+  }
+}
+
+// Export functions for use in other modules
+export { generateLandingPagePrompt, generateWebsite, createWebsite };
+// export type { GeneratedSite, Product };
+
+// Run the website generation if this file is executed directly
+// if (typeof require !== 'undefined' && require.main === module) {
+//   createWebsite();
+// }
